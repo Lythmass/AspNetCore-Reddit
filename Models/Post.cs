@@ -14,6 +14,7 @@ namespace Reddit.Models
         [ForeignKey(nameof(AuthorId))]
         public virtual User? Author { get; set; }
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public virtual Community Community { get; set; }
         public int  Upvotes { get; set; }
         public int  Downvotes{ get; set; }
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;

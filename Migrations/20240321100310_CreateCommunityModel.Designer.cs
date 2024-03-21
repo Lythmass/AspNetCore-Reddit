@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Reddit;
 
@@ -10,9 +11,11 @@ using Reddit;
 namespace Reddit.Migrations
 {
     [DbContext(typeof(ApplcationDBContext))]
-    partial class ApplcationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240321100310_CreateCommunityModel")]
+    partial class CreateCommunityModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -20,21 +23,6 @@ namespace Reddit.Migrations
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true);
-
-            modelBuilder.Entity("CommunityUser", b =>
-                {
-                    b.Property<int>("SubscibedCommunitiesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SubscribedUsersId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("SubscibedCommunitiesId", "SubscribedUsersId");
-
-                    b.HasIndex("SubscribedUsersId");
-
-                    b.ToTable("CommunityUser");
-                });
 
             modelBuilder.Entity("Reddit.Models.Comment", b =>
                 {
@@ -126,28 +114,18 @@ namespace Reddit.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("CommunityId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CommunityId");
+
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("CommunityUser", b =>
-                {
-                    b.HasOne("Reddit.Models.Community", null)
-                        .WithMany()
-                        .HasForeignKey("SubscibedCommunitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Reddit.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("SubscribedUsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Reddit.Models.Comment", b =>
@@ -160,7 +138,7 @@ namespace Reddit.Migrations
             modelBuilder.Entity("Reddit.Models.Community", b =>
                 {
                     b.HasOne("Reddit.Models.User", "Owner")
-                        .WithMany("OwnedCommunities")
+                        .WithMany()
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -185,9 +163,18 @@ namespace Reddit.Migrations
                     b.Navigation("Community");
                 });
 
+            modelBuilder.Entity("Reddit.Models.User", b =>
+                {
+                    b.HasOne("Reddit.Models.Community", null)
+                        .WithMany("UserSubscribers")
+                        .HasForeignKey("CommunityId");
+                });
+
             modelBuilder.Entity("Reddit.Models.Community", b =>
                 {
                     b.Navigation("Posts");
+
+                    b.Navigation("UserSubscribers");
                 });
 
             modelBuilder.Entity("Reddit.Models.Post", b =>
@@ -197,8 +184,6 @@ namespace Reddit.Migrations
 
             modelBuilder.Entity("Reddit.Models.User", b =>
                 {
-                    b.Navigation("OwnedCommunities");
-
                     b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618

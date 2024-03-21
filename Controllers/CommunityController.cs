@@ -9,49 +9,48 @@ namespace Reddit.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PostsController : ControllerBase
+    public class CommunityController : ControllerBase
     {
         private readonly ApplcationDBContext _context;
         private readonly IMapper _mapper;
-
-        public PostsController(ApplcationDBContext context, IMapper mapper)
+        public CommunityController(ApplcationDBContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        // GET: api/Posts
+        // GET: api/Communities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
+        public async Task<ActionResult<IEnumerable<Community>>> GetPosts()
         {
-            return await _context.Posts.ToListAsync();
+            return await _context.Communities.ToListAsync();
         }
 
-        // GET: api/Posts/5
+        // GET: api/Communities/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(int id)
+        public async Task<ActionResult<Community>> GetCommunity(int id)
         {
-            var post = await _context.Posts.FindAsync(id);
+            var community = await _context.Communities.FindAsync(id);
 
-            if (post == null)
+            if (community == null)
             {
                 return NotFound();
             }
 
-            return post;
+            return community;
         }
 
-        // PUT: api/Posts/5
+        // PUT: api/Communities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(int id, Post post)
+        public async Task<IActionResult> PutCommunity(int id, Community community)
         {
-            if (id != post.Id)
+            if (id != community.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(post).State = EntityState.Modified;
+            _context.Entry(community).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +58,7 @@ namespace Reddit.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PostExists(id))
+                if (!CommunityExists(id))
                 {
                     return NotFound();
                 }
@@ -72,39 +71,38 @@ namespace Reddit.Controllers
             return NoContent();
         }
 
-        // POST: api/Posts
+        // POST: api/Communities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("communityId")]
-        public async Task<ActionResult<Post>> PostPost(CreatePostDto createPostDto, int communityId)
+        [HttpPost]
+        public async Task<ActionResult<Community>> PostCommunity(CreateCommunityDto createCommunityDto)
         {
-            var post = _mapper.toPost(createPostDto);
-            var community = await _context.Communities.FindAsync(communityId);
-            post.Community = community;
-            _context.Posts.Add(post);
+            var community = _mapper.toCommunity(createCommunityDto);
+
+            _context.Communities.Add(community);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPost", new { id = post.Id }, post);
+            return CreatedAtAction("GetCommunity", new { id = community.Id }, community);
         }
 
-        // DELETE: api/Posts/5
+        // DELETE: api/Communities/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePost(int id)
+        public async Task<IActionResult> DeleteCommunity(int id)
         {
-            var post = await _context.Posts.FindAsync(id);
-            if (post == null)
+            var community = await _context.Communities.FindAsync(id);
+            if (community == null)
             {
                 return NotFound();
             }
 
-            _context.Posts.Remove(post);
+            _context.Communities.Remove(community);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool PostExists(int id)
+        private bool CommunityExists(int id)
         {
-            return _context.Posts.Any(e => e.Id == id);
+            return _context.Communities.Any(e => e.Id == id);
         }
     }
 }
